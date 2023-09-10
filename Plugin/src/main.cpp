@@ -3,31 +3,51 @@ class Hooks
 public:
 	static void Install()
 	{
-		hkGenerateSaveFileName::Install();
+		hkQuickSaveLoadHandler::Install();
 	}
 
 private:
-	class hkGenerateSaveFileName
+	class hkQuickSaveLoadHandler
 	{
 	public:
 		static void Install()
 		{
-			static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x023AC9AC), 0xAC };
-			REL::safe_fill(target.address(), REL::NOP, 0x03);
+			{
+				static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x028A826C), 0xAE };
+				REL::safe_fill(target.address(), REL::NOP, 0x09);
+			}
 
-			auto code = GenerateSaveFileName();
-			assert(code.getSize() <= 0x03);
-			REL::safe_write(target.address(), code.getCode(), code.getSize());
+			{
+				static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x028A826C), 0xC3 };
+				auto& trampoline = SFSE::GetTrampoline();
+				_QuickSaveLoadHandler = trampoline.write_call<5>(target.address(), QuickSaveLoadHandler);
+			}
 		}
 
 	private:
-		struct GenerateSaveFileName : Xbyak::CodeGenerator
+		static bool LoadMostRecent()
 		{
-			GenerateSaveFileName()
-			{
-				cmp(edi, 10);
+			using func_t = decltype(&LoadMostRecent);
+			static REL::Relocation<func_t> func{ REL::Offset(0x023A3F10) };
+			return func();
+		}
+
+		static void QuickSaveLoadHandler(void* a_this, std::uint32_t a_flag)
+		{
+			switch (a_flag) {
+			case 0x08:
+				_QuickSaveLoadHandler(a_this, 0x02);
+				return;
+			case 0x10:
+				LoadMostRecent();
+				return;
+			default:
+				_QuickSaveLoadHandler(a_this, a_flag);
+				return;
 			}
-		};
+		}
+
+		inline static REL::Relocation<decltype(&QuickSaveLoadHandler)> _QuickSaveLoadHandler;
 	};
 };
 
@@ -76,8 +96,7 @@ DLLEXPORT bool SFSEAPI SFSEPlugin_Load(const SFSE::LoadInterface* a_sfse)
 
 	INFO("{} v{} loaded", Plugin::NAME, Plugin::Version);
 
-	// SFSE::AllocTrampoline(1 << 10);
-
+	SFSE::AllocTrampoline(1 << 6);
 	SFSE::GetMessagingInterface()->RegisterListener(MessageCallback);
 
 	return true;
