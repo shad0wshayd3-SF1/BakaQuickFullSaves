@@ -1,3 +1,20 @@
+class Config
+{
+public:
+	class General
+	{
+	public:
+		inline static DKUtil::Alias::Boolean bAutosaveMode{ "bAutosaveMode", "General" };
+	};
+
+	static void Load()
+	{
+		static auto MainConfig = COMPILE_PROXY("BakaQuickFullSaves.ini");
+		MainConfig.Bind(General::bAutosaveMode, false);
+		MainConfig.Load();
+	}
+};
+
 class Hooks
 {
 public:
@@ -13,12 +30,12 @@ private:
 		static void Install()
 		{
 			{
-				static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x028A826C), 0xAE };
+				static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x028A809C), 0xAE };
 				REL::safe_fill(target.address(), REL::NOP, 0x09);
 			}
 
 			{
-				static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x028A826C), 0xC3 };
+				static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x028A809C), 0xC3 };
 				auto& trampoline = SFSE::GetTrampoline();
 				_QuickSaveLoadHandler = trampoline.write_call<5>(target.address(), QuickSaveLoadHandler);
 			}
@@ -28,7 +45,7 @@ private:
 		static bool LoadMostRecent()
 		{
 			using func_t = decltype(&LoadMostRecent);
-			static REL::Relocation<func_t> func{ REL::Offset(0x023A3F10) };
+			static REL::Relocation<func_t> func{ REL::Offset(0x023A3EF0) };
 			return func();
 		}
 
@@ -36,7 +53,11 @@ private:
 		{
 			switch (a_flag) {
 			case 0x08:
-				_QuickSaveLoadHandler(a_this, 0x02);
+				if (*Config::General::bAutosaveMode) {
+					_QuickSaveLoadHandler(a_this, 0x01);
+				} else {
+					_QuickSaveLoadHandler(a_this, 0x02);
+				}
 				return;
 			case 0x10:
 				LoadMostRecent();
@@ -98,6 +119,8 @@ DLLEXPORT bool SFSEAPI SFSEPlugin_Load(const SFSE::LoadInterface* a_sfse)
 
 	SFSE::AllocTrampoline(1 << 6);
 	SFSE::GetMessagingInterface()->RegisterListener(MessageCallback);
+
+	Config::Load();
 
 	return true;
 }
