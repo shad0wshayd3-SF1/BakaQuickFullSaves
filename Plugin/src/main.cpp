@@ -20,10 +20,46 @@ class Hooks
 public:
 	static void Install()
 	{
+		hkQuicksave::Install();
 		hkQuickSaveLoadHandler::Install();
 	}
 
 private:
+	class hkQuicksave
+	{
+	public:
+		static void Install()
+		{
+			static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x023B31FC), 0xCF };
+			auto& trampoline = SFSE::GetTrampoline();
+			trampoline.write_call<5>(target.address(), Quicksave);
+		}
+
+	private:
+		static void Quicksave(void* a_this)
+		{
+			if (*Config::General::bAutosaveMode) {
+				Autosave(a_this);
+			} else {
+				SaveGame(a_this, nullptr, -1, 0);
+			}
+		}
+
+		static void Autosave(void* a_this)
+		{
+			using func_t = decltype(&Autosave);
+			REL::Relocation<func_t> func{ REL::Offset(0x023A93EC) };
+			return func(a_this);
+		}
+
+		static void SaveGame(void* a_this, char* a_saveFileName, std::int32_t a_deviceID, std::uint32_t a_outputStats)
+		{
+			using func_t = decltype(&SaveGame);
+			REL::Relocation<func_t> func{ REL::Offset(0x023B104C) };
+			return func(a_this, a_saveFileName, a_deviceID, a_outputStats);
+		}
+	};
+
 	class hkQuickSaveLoadHandler
 	{
 	public:
@@ -48,13 +84,6 @@ private:
 		static void QuickSaveLoadHandler(void* a_this, std::uint32_t a_flag)
 		{
 			switch (a_flag) {
-			case 0x08:
-				if (*Config::General::bAutosaveMode) {
-					_QuickSaveLoadHandler(a_this, 0x01);
-				} else {
-					_QuickSaveLoadHandler(a_this, 0x02);
-				}
-				return;
 			case 0x10:
 				LoadMostRecent();
 				return;
