@@ -29,16 +29,12 @@ private:
 	public:
 		static void Install()
 		{
-			{
-				static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x028A809C), 0xAE };
-				REL::safe_fill(target.address(), REL::NOP, 0x09);
-			}
+			static REL::Relocation<std::uintptr_t> patch{ REL::Offset(0x028A809C), 0xAE };
+			REL::safe_fill(patch.address(), REL::NOP, 0x09);
 
-			{
-				static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x028A809C), 0xC3 };
-				auto& trampoline = SFSE::GetTrampoline();
-				_QuickSaveLoadHandler = trampoline.write_call<5>(target.address(), QuickSaveLoadHandler);
-			}
+			static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x028A809C), 0xC3 };
+			auto& trampoline = SFSE::GetTrampoline();
+			_QuickSaveLoadHandler = trampoline.write_call<5>(target.address(), QuickSaveLoadHandler);
 		}
 
 	private:
