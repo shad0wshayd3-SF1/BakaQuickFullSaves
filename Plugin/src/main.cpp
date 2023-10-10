@@ -30,7 +30,7 @@ private:
 	public:
 		static void Install()
 		{
-			static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x023B634C), 0xCF };
+			static REL::Relocation<std::uintptr_t> target{ REL::ID(147941), 0xCF };
 			auto& trampoline = SFSE::GetTrampoline();
 			trampoline.write_call<5>(target.address(), Quicksave);
 		}
@@ -48,14 +48,14 @@ private:
 		static void Autosave(void* a_this)
 		{
 			using func_t = decltype(&Autosave);
-			REL::Relocation<func_t> func{ REL::Offset(0x023AC53C) };
+			REL::Relocation<func_t> func{ REL::ID(147827) };
 			return func(a_this);
 		}
 
 		static void SaveGame(void* a_this, char* a_saveFileName, std::int32_t a_deviceID, std::uint32_t a_outputStats)
 		{
 			using func_t = decltype(&SaveGame);
-			REL::Relocation<func_t> func{ REL::Offset(0x023B419C) };
+			REL::Relocation<func_t> func{ REL::ID(147915) };
 			return func(a_this, a_saveFileName, a_deviceID, a_outputStats);
 		}
 	};
@@ -65,10 +65,10 @@ private:
 	public:
 		static void Install()
 		{
-			static REL::Relocation<std::uintptr_t> patch{ REL::Offset(0x028ABB6C), 0xAE };
+			static REL::Relocation<std::uintptr_t> patch{ REL::ID(167005), 0xAE };
 			REL::safe_fill(patch.address(), REL::NOP, 0x09);
 
-			static REL::Relocation<std::uintptr_t> target{ REL::Offset(0x028ABB6C), 0xC3 };
+			static REL::Relocation<std::uintptr_t> target{ REL::ID(167005), 0xC3 };
 			auto& trampoline = SFSE::GetTrampoline();
 			_QuickSaveLoadHandler = trampoline.write_call<5>(target.address(), QuickSaveLoadHandler);
 		}
@@ -77,7 +77,7 @@ private:
 		static bool LoadMostRecent()
 		{
 			using func_t = decltype(&LoadMostRecent);
-			static REL::Relocation<func_t> func{ REL::Offset(0x023A7040) };
+			static REL::Relocation<func_t> func{ REL::ID(147756) };
 			return func();
 		}
 
@@ -104,7 +104,7 @@ DLLEXPORT constinit auto SFSEPlugin_Version = []() noexcept {
 	data.PluginName(Plugin::NAME);
 	data.AuthorName(Plugin::AUTHOR);
 	data.UsesSigScanning(false);
-	data.UsesAddressLibrary(false);
+	data.UsesAddressLibrary(true);
 	data.HasNoStructUse(true);
 	data.IsLayoutDependent(false);
 	data.CompatibleVersions({ SFSE::RUNTIME_LATEST });
