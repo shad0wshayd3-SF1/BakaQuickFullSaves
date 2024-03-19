@@ -68,7 +68,7 @@ private:
 			static REL::Relocation<std::uintptr_t> patch{ REL::ID(167005), 0xAE };
 			REL::safe_fill(patch.address(), REL::NOP, 0x09);
 
-			static REL::Relocation<std::uintptr_t> target{ REL::ID(167005), 0xC3 };
+			static REL::Relocation<std::uintptr_t> target{ REL::ID(167005), 0xC8 };
 			auto& trampoline = SFSE::GetTrampoline();
 			_QuickSaveLoadHandler = trampoline.write_call<5>(target.address(), QuickSaveLoadHandler);
 		}
