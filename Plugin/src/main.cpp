@@ -38,9 +38,12 @@ private:
 	private:
 		static void Quicksave(void* a_this)
 		{
-			if (*Config::General::bAutosaveMode) {
+			if (*Config::General::bAutosaveMode)
+			{
 				Autosave(a_this);
-			} else {
+			}
+			else
+			{
 				SaveGame(a_this, nullptr, -1, 0);
 			}
 		}
@@ -83,7 +86,8 @@ private:
 
 		static void QuickSaveLoadHandler(void* a_this, std::uint32_t a_flag)
 		{
-			switch (a_flag) {
+			switch (a_flag)
+			{
 			case 0x10:
 				LoadMostRecent();
 				return;
@@ -97,7 +101,8 @@ private:
 	};
 };
 
-DLLEXPORT constinit auto SFSEPlugin_Version = []() noexcept {
+DLLEXPORT constinit auto SFSEPlugin_Version = []() noexcept
+{
 	SFSE::PluginVersionData data{};
 
 	data.PluginVersion(Plugin::Version);
@@ -116,12 +121,13 @@ namespace
 {
 	void MessageCallback(SFSE::MessagingInterface::Message* a_msg) noexcept
 	{
-		switch (a_msg->type) {
+		switch (a_msg->type)
+		{
 		case SFSE::MessagingInterface::kPostLoad:
-			{
-				Hooks::Install();
-				break;
-			}
+		{
+			Hooks::Install();
+			break;
+		}
 		default:
 			break;
 		}
@@ -131,7 +137,8 @@ namespace
 DLLEXPORT bool SFSEAPI SFSEPlugin_Load(const SFSE::LoadInterface* a_sfse)
 {
 #ifndef NDEBUG
-	while (!IsDebuggerPresent()) {
+	while (!IsDebuggerPresent())
+	{
 		Sleep(100);
 	}
 #endif
