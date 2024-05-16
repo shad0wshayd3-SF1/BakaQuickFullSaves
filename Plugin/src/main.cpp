@@ -68,10 +68,10 @@ private:
 	public:
 		static void Install()
 		{
-			static REL::Relocation<std::uintptr_t> patch{ REL::ID(167005), 0xAE };
+			static REL::Relocation<std::uintptr_t> patch{ REL::ID(167005), 0xAF };
 			REL::safe_fill(patch.address(), REL::NOP, 0x09);
 
-			static REL::Relocation<std::uintptr_t> target{ REL::ID(167005), 0xC8 };
+			static REL::Relocation<std::uintptr_t> target{ REL::ID(167005), 0xCB };
 			auto& trampoline = SFSE::GetTrampoline();
 			_QuickSaveLoadHandler = trampoline.write_call<5>(target.address(), QuickSaveLoadHandler);
 		}
@@ -121,16 +121,12 @@ namespace
 DLLEXPORT bool SFSEAPI SFSEPlugin_Load(const SFSE::LoadInterface* a_sfse)
 {
 #ifndef NDEBUG
-	while (!IsDebuggerPresent())
-	{
-		Sleep(100);
-	}
+	MessageBoxA(NULL, "Loaded. You can now attach the debugger or continue execution.", Plugin::NAME.data(), NULL);
 #endif
 
 	SFSE::Init(a_sfse);
 
 	DKUtil::Logger::Init(Plugin::NAME, std::to_string(Plugin::Version));
-
 	INFO("{} v{} loaded", Plugin::NAME, Plugin::Version);
 
 	SFSE::AllocTrampoline(1 << 5);
