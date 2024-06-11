@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 # info
 project(
 	BakaQuickFullSaves
-	VERSION 2.5.0
+	VERSION 3.0.0
 	LANGUAGES CXX
 )
 

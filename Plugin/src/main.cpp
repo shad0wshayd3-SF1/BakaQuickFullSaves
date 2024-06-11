@@ -30,7 +30,7 @@ private:
 	public:
 		static void Install()
 		{
-			static REL::Relocation<std::uintptr_t> target{ REL::ID(147941), 0xCF };
+			static REL::Relocation<std::uintptr_t> target{ REL::ID(147941), 0xD8 };
 			auto& trampoline = SFSE::GetTrampoline();
 			trampoline.write_call<5>(target.address(), Quicksave);
 		}
