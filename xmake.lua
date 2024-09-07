@@ -6,7 +6,7 @@ includes("extern/commonlibsf")
 
 -- set project
 set_project("BakaQuickFullSaves")
-set_version("1.0.0")
+set_version("4.0.0")
 set_license("GPL-3.0")
 
 -- set defaults
@@ -23,10 +23,16 @@ set_policy("build.optimization.lto", true)
 add_rules("mode.releasedbg")
 add_rules("plugin.vsxmake.autoupdate")
 
+-- add requires
+add_requires("figcone")
+
 -- setup targets
 target("BakaQuickFullSaves")
     -- bind dependencies
     add_deps("commonlibsf")
+
+    -- bind packages
+    add_packages("figcone")
 
     -- add commonlibsf plugin
     add_rules("commonlibsf.plugin", {

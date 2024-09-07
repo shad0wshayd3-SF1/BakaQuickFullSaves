@@ -1,17 +1,36 @@
 class Config
 {
 public:
-	class General
+	class SectionGeneral
 	{
 	public:
-		inline static DKUtil::Alias::Boolean bAutosaveMode{ "bAutosaveMode", "General" };
+		bool bAutosaveMode{ false };
 	};
+
+	// members
+	SectionGeneral General;
+
+public:
+	static Config* GetSingleton()
+	{
+		static Config singleton;
+		return std::addressof(singleton);
+	}
 
 	static void Load()
 	{
-		static auto MainConfig = COMPILE_PROXY("BakaQuickFullSaves.ini");
-		MainConfig.Bind(General::bAutosaveMode, false);
-		MainConfig.Load();
+		auto path = std::filesystem::current_path() /= "Data/SFSE/plugins/BakaQuickFullSaves.ini"sv;
+		try
+		{
+			auto reader = figcone::ConfigReader{};
+			*GetSingleton() = reader.readIniFile<Config>(path.make_preferred());
+		}
+		catch (const std::exception& e)
+		{
+			SFSE::log::error("{}", e.what());
+		}
+
+		SFSE::log::debug("bAutosaveMode is: {}", GetSingleton()->General.bAutosaveMode);
 	}
 };
 
@@ -38,7 +57,7 @@ private:
 	private:
 		static void Quicksave(void* a_this)
 		{
-			if (*Config::General::bAutosaveMode)
+			if (Config::GetSingleton()->General.bAutosaveMode)
 			{
 				Autosave(a_this);
 			}
