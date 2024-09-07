@@ -1,8 +1,11 @@
 -- set xmake version
 set_xmakever("2.9.4")
 
--- includes
+-- include local folders
 includes("extern/commonlibsf")
+
+-- add custom package repository
+add_repositories("xre https://github.com/shad0wshayd3/custom-xrepo")
 
 -- set project
 set_project("BakaQuickFullSaves")
@@ -16,33 +19,36 @@ set_optimize("faster")
 set_warnings("allextra", "error")
 set_defaultmode("releasedbg")
 
--- lto
+-- enable lto
 set_policy("build.optimization.lto", true)
 
 -- add rules
-add_rules("mode.releasedbg")
+add_rules("mode.debug", "mode.releasedbg")
 add_rules("plugin.vsxmake.autoupdate")
 
--- add requires
-add_requires("figcone")
+-- require package dependencies
+add_requires("figcone", {configs = {use_ini = true}})
 
 -- setup targets
 target("BakaQuickFullSaves")
-    -- bind dependencies
+    -- bind local dependencies
     add_deps("commonlibsf")
 
-    -- bind packages
+    -- bind package dependencies
     add_packages("figcone")
 
     -- add commonlibsf plugin
     add_rules("commonlibsf.plugin", {
         name = "BakaQuickFullSaves",
-        author = "shad0wshayd3"
+        author = "shad0wshayd3",
+        options = {
+            no_struct_use = true
+        }
     })
 
     -- add source files
     add_files("src/*.cpp")
-    add_headerfiles("src/**.h")
+    add_headerfiles("src/*.h")
     add_includedirs("src")
     set_pcxxheader("src/PCH.h")
 

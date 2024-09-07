@@ -19,18 +19,20 @@ public:
 
 	static void Load()
 	{
-		auto path = std::filesystem::current_path() /= "Data/SFSE/plugins/BakaQuickFullSaves.ini"sv;
+		const auto plugin = SFSE::PluginVersionData::GetSingleton();
+		auto config = std::filesystem::current_path() /=
+			std::format("Data/SFSE/plugins/{}.ini"sv, plugin->GetPluginName());
 		try
 		{
 			auto reader = figcone::ConfigReader{};
-			*GetSingleton() = reader.readIniFile<Config>(path.make_preferred());
+			*GetSingleton() = reader.readIniFile<Config>(config.make_preferred());
 		}
 		catch (const std::exception& e)
 		{
 			SFSE::log::error("{}", e.what());
 		}
 
-		SFSE::log::debug("bAutosaveMode is: {}", GetSingleton()->General.bAutosaveMode);
+		SFSE::log::debug("bAutosaveMode is: {}"sv, GetSingleton()->General.bAutosaveMode);
 	}
 };
 
@@ -142,7 +144,7 @@ SFSEPluginLoad(const SFSE::LoadInterface* a_sfse)
 	SFSE::Init(a_sfse);
 
 	const auto plugin = SFSE::PluginVersionData::GetSingleton();
-	SFSE::log::info("{} {} loaded", plugin->GetPluginName(), plugin->GetPluginVersion());
+	SFSE::log::info("{} {} loaded"sv, plugin->GetPluginName(), plugin->GetPluginVersion());
 
 	SFSE::AllocTrampoline(1 << 5);
 	SFSE::GetMessagingInterface()->RegisterListener(MessageCallback);
