@@ -146,10 +146,10 @@ SFSEPluginLoad(const SFSE::LoadInterface* a_sfse)
 	const auto plugin = SFSE::PluginVersionData::GetSingleton();
 	SFSE::log::info("{} {} loaded"sv, plugin->GetPluginName(), plugin->GetPluginVersion());
 
-	SFSE::AllocTrampoline(1 << 5);
-	SFSE::GetMessagingInterface()->RegisterListener(MessageCallback);
-
 	Config::Load();
+
+	SFSE::AllocTrampoline(32);
+	SFSE::GetMessagingInterface()->RegisterListener(MessageCallback);
 
 	return true;
 }
