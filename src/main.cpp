@@ -1,74 +1,24 @@
-class Config
+namespace Config
 {
-public:
-	class SectionGeneral
+	namespace General
 	{
-	public:
-		bool bAutosaveMode{ false };
-	};
-
-	// members
-	SectionGeneral General;
-
-public:
-	static Config* GetSingleton()
-	{
-		static Config singleton;
-		return std::addressof(singleton);
+		static REX::INI::Bool bAutosaveMode{ "General", "bAutosaveMode", false };
 	}
 
 	static void Load()
 	{
-		const auto plugin = SFSE::PluginVersionData::GetSingleton();
-		auto config = std::filesystem::current_path() /=
-			std::format("Data/SFSE/plugins/{}.ini"sv, plugin->GetPluginName());
-		try
-		{
-			auto reader = figcone::ConfigReader{};
-			*GetSingleton() = reader.readIniFile<Config>(config.make_preferred());
-		}
-		catch (const std::exception& e)
-		{
-			SFSE::log::error("{}", e.what());
-		}
-
-		SFSE::log::debug("bAutosaveMode is: {}"sv, GetSingleton()->General.bAutosaveMode);
+		const auto ini = REX::INI::SettingStore::GetSingleton();
+		ini->Init(
+			"Data/SFSE/plugins/BakaQuickFullSaves.ini",
+			"Data/SFSE/plugins/BakaQuickFullSavesCustom.ini");
+		ini->Load();
 	}
-};
+}
 
-class Hooks
+namespace Hooks
 {
-public:
-	static void Install()
+	namespace hkQuicksave
 	{
-		hkQuicksave::Install();
-		hkQuickSaveLoadHandler::Install();
-	}
-
-private:
-	class hkQuicksave
-	{
-	public:
-		static void Install()
-		{
-			static REL::Relocation<std::uintptr_t> target{ REL::ID(147941), 0xD8 };
-			auto& trampoline = SFSE::GetTrampoline();
-			trampoline.write_call<5>(target.address(), Quicksave);
-		}
-
-	private:
-		static void Quicksave(void* a_this)
-		{
-			if (Config::GetSingleton()->General.bAutosaveMode)
-			{
-				Autosave(a_this);
-			}
-			else
-			{
-				SaveGame(a_this, nullptr, -1, 0);
-			}
-		}
-
 		static void Autosave(void* a_this)
 		{
 			using func_t = decltype(&Autosave);
@@ -82,22 +32,30 @@ private:
 			REL::Relocation<func_t> func{ REL::ID(147915) };
 			return func(a_this, a_saveFileName, a_deviceID, a_outputStats);
 		}
-	};
 
-	class hkQuickSaveLoadHandler
-	{
-	public:
-		static void Install()
+		static void Quicksave(void* a_this)
 		{
-			static REL::Relocation<std::uintptr_t> patch{ REL::ID(167005), 0xAF };
-			REL::safe_fill(patch.address(), REL::NOP, 0x09);
-
-			static REL::Relocation<std::uintptr_t> target{ REL::ID(167005), 0xCB };
-			auto& trampoline = SFSE::GetTrampoline();
-			_QuickSaveLoadHandler = trampoline.write_call<5>(target.address(), QuickSaveLoadHandler);
+			if (Config::General::bAutosaveMode.GetValue())
+			{
+				Autosave(a_this);
+			}
+			else
+			{
+				SaveGame(a_this, nullptr, -1, 0);
+			}
 		}
 
-	private:
+		static void Install()
+		{
+			static REL::Relocation target{ REL::ID(147941), 0xD8 };
+			target.write_call<5>(Quicksave);
+		}
+	}
+
+	namespace hkQuickSaveLoadHandler
+	{
+		static REL::Relocation<void(void*, std::uint32_t)> _QuickSaveLoadHandler;
+
 		static bool LoadMostRecent()
 		{
 			using func_t = decltype(&LoadMostRecent);
@@ -118,9 +76,22 @@ private:
 			}
 		}
 
-		inline static REL::Relocation<decltype(&QuickSaveLoadHandler)> _QuickSaveLoadHandler;
-	};
-};
+		static void Install()
+		{
+			static REL::Relocation patch{ REL::ID(167005), 0xAF };
+			REL::safe_fill(patch.address(), REL::NOP, 0x09);
+
+			static REL::Relocation target{ REL::ID(167005), 0xCB };
+			_QuickSaveLoadHandler = target.write_call<5>(QuickSaveLoadHandler);
+		}
+	}
+
+	static void Install()
+	{
+		hkQuicksave::Install();
+		hkQuickSaveLoadHandler::Install();
+	}
+}
 
 namespace
 {

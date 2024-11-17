@@ -1,8 +1,7 @@
 ﻿#pragma once
 
 #include "RE/Starfield.h"
+#include "REX/REX/INI.h"
 #include "SFSE/SFSE.h"
-
-#include <figcone/figcone.h>
 
 using namespace std::literals;

@@ -4,12 +4,9 @@ set_xmakever("2.9.4")
 -- include local folders
 includes("extern/commonlibsf")
 
--- add custom package repository
-add_repositories("xre https://github.com/shad0wshayd3/custom-xrepo")
-
 -- set project
 set_project("BakaQuickFullSaves")
-set_version("4.0.0")
+set_version("5.0.0")
 set_license("GPL-3.0")
 
 -- set defaults
@@ -26,8 +23,8 @@ set_policy("build.optimization.lto", true)
 add_rules("mode.debug", "mode.releasedbg")
 add_rules("plugin.vsxmake.autoupdate")
 
--- require package dependencies
-add_requires("figcone", {configs = {use_ini = true}})
+-- add config
+set_config("rex_ini", true)
 
 -- setup targets
 target("BakaQuickFullSaves")
