@@ -78,11 +78,14 @@ namespace Hooks
 
 		static void Install()
 		{
-			static REL::Relocation patch{ REL::ID(167005), 0xAF };
-			REL::safe_fill(patch.address(), REL::NOP, 0x09);
+			static REL::Relocation target{ REL::ID(167005) };
+			static constexpr auto TARGET_ADDR{ 0xAF };
+			static constexpr auto TARGET_RETN{ 0xB8 };
+			static constexpr auto TARGET_FILL{ TARGET_RETN - TARGET_ADDR };
+			REL::safe_fill(target.address() + TARGET_ADDR, REL::NOP, TARGET_FILL);
 
-			static REL::Relocation target{ REL::ID(167005), 0xCB };
-			_QuickSaveLoadHandler = target.write_call<5>(QuickSaveLoadHandler);
+			static constexpr auto TARGET_CALL{ 0xCB };
+			_QuickSaveLoadHandler = target.write_call<5, TARGET_CALL>(QuickSaveLoadHandler);
 		}
 	}
 
