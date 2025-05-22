@@ -6,7 +6,7 @@ includes("lib/commonlibsf")
 
 -- set project
 set_project("BakaQuickFullSaves")
-set_version("5.0.0")
+set_version("6.0.0")
 set_license("GPL-3.0")
 
 -- set defaults
@@ -22,7 +22,7 @@ set_policy("build.optimization.lto", true)
 set_policy("package.requires_lock", true)
 
 -- set config
-set_config("rex_ini", true)
+set_config("commonlib_ini", true)
 
 -- setup targets
 target("BakaQuickFullSaves")
